@@ -4,7 +4,7 @@ namespace HelloOpenGl.Shaders;
 
 public class Shader : IDisposable
 {
-    int Handle;
+    public int Handle;
     private bool disposedValue = false;
 
     protected virtual void Dispose(bool disposing)
@@ -16,9 +16,14 @@ public class Shader : IDisposable
         }
     }
 
+    public int GetAttribLocation(string attribName)
+    {
+        return GL.GetAttribLocation(Handle, attribName);
+    }
+
     ~Shader()
     {
-        if (disposedValue == false)
+        if (!disposedValue)
             Console.WriteLine("GPU Resource leak! Did you forget to call Dispose()?");
     }
 
@@ -28,7 +33,12 @@ public class Shader : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    public Shader(string vertexPath, string fragmentPath, int vertexShader = 0, int fragmentShader = 0)
+    public Shader(
+        string vertexPath,
+        string fragmentPath,
+        int vertexShader = 0,
+        int fragmentShader = 0
+    )
     {
         string VertexShaderSource = File.ReadAllText(vertexPath);
 
@@ -39,7 +49,6 @@ public class Shader : IDisposable
 
         fragmentShader = GL.CreateShader(ShaderType.FragmentShader);
         GL.ShaderSource(fragmentShader, FragmentShaderSource);
-
         GL.CompileShader(vertexShader);
 
         GL.GetShader(vertexShader, ShaderParameter.CompileStatus, out int successv);
@@ -67,8 +76,7 @@ public class Shader : IDisposable
         GL.GetProgram(Handle, GetProgramParameterName.LinkStatus, out int successp);
         if (successp == 0)
         {
-            string infoLog = GL.GetProgramInfoLog(Handle);
-            Console.WriteLine(infoLog);
+            string infoLog = GL.GetProgramInfoLog(Handle); Console.WriteLine(infoLog);
         }
 
         GL.DetachShader(Handle, vertexShader);
